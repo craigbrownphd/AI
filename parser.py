@@ -60,6 +60,9 @@ def parse(exp):
     if exp[0] == '(' and exp[-1]==')':
         return parse(exp[1:-1])
 
+    # strip spaces
+    exp = exp.replace(" ","")
+
     special_index = char_index(exp)
     if special_index == -1:
         assert len(exp) == 1

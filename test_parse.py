@@ -85,32 +85,87 @@ class TestParse(TestCase):
 
         self.assertEqual(or_node, parse('a|b|!(c&d)'))
 
-    def test_parse_simple_or_not_and(self):
-        a = Node(None, 'a', None)
-        b = Node(None, 'b', None)
-        c = Node(None, 'c', None)
-        d = Node(None,'d',None)
-
-
-        and_node = Node(c, '&', d)
-        or_node = Node(a, '|',and_node)
-
+    def test_parse_paren(self):
+        and_node = Node(self.b, '&', self.c)
+        or_node = Node(self.a, '|',and_node)
         self.assertEqual(or_node, parse('a|(b&c)'))
 
+    def test_parse_or_and(self):
+        or_node = Node(self.a, '|', self.b)
+        and_node = Node(or_node, '&', self.c)
+        self.assertEqual(and_node, parse('a|b&c'))
 
-    # todo:  a|b&c
-    # todo:  (a|b)&c
-    # todo:  a|(b&(c|d))
-    # todo: !a & b
-    # todo: !(a&b)
-    # todo: a|b|c&d
-    # todo: a|b|c|d
-    # todo: !a|b|c|d
 
-    # todo: !a|b|c
+    def test_parse_or_and_focus_due_to_paren(self):
+        or_node = Node(self.a, '|', self.b)
+        and_node = Node(or_node, '&', self.c)
+        self.assertEqual(and_node, parse('a|b&c'))
 
-    # todo: !a|c
-    #todo: tests with spaces in expression
+    def test_parse_too_diff(self):
+        inner_or_node = Node(self.c, '|', self.d)
+        and_node = Node(self.b, '&', inner_or_node)
+        or_node = Node(self.a, '|', and_node)
+        self.assertEqual(or_node, parse('a|(b&(c|d))'))
+
+    def test_parse_not_and(self):
+        not_node = Node(self.a, '!', None)
+        and_node = Node(not_node, '&', self.b)
+        self.assertEqual(and_node, parse('!a&b'))
+
+    def test_parse_not_and_with_spaces(self):
+        not_node = Node(self.a, '!', None)
+        and_node = Node(not_node, '&', self.b)
+        self.assertEqual(and_node, parse('!a & b'))
+
+    def test_parse_not_and_paren(self):
+        and_node = Node(self.a, '&', self.b)
+        not_node = Node(and_node, '!', None)
+        self.assertEqual(not_node, parse('!(a&b)'))
+
+    def test_parse_order_of_operations(self):
+        right_or_node = Node(self.b, '|', self.c)
+        left_or_node = Node(self.a, '|', right_or_node)
+        and_node = Node(left_or_node, '&', self.d)
+        self.assertEqual(and_node, parse('a|b|c&d'))
+
+    def test_parse_multiple_or(self):
+        right_or = Node(self.c, '|', self.d)
+        middle_or = Node(self.b, '|', right_or)
+        most_left_or = Node(self.a, '|', middle_or)
+        self.assertEqual(most_left_or, parse('a|b|c|d'))
+
+    def test_parse_multiple_and(self):
+        right_and = Node(self.c, '&', self.d)
+        middle_and = Node(self.b, '&', right_and)
+        most_left_and = Node(self.a, '&', middle_and)
+        self.assertEqual(most_left_and, parse('a&b&c&d'))
+
+    def test_parse_multiple_or_with_twist(self):
+        right_or = Node(self.c, '|', self.d)
+        middle_or = Node(self.b, '|', right_or)
+        not_node = Node(self.a, '!', None)
+        most_left_or = Node(not_node, '|', middle_or)
+        self.assertEqual(most_left_or, parse('!a|b|c|d'))
+
+    def test_parse_simpler_twist(self):
+        middle_or = Node(self.b, '|', self.c)
+        not_node = Node(self.a, '!', None)
+        most_left_or = Node(not_node, '|', middle_or)
+        self.assertEqual(most_left_or, parse('!a|b|c'))
+
+    def test_parse_simplest_twist(self):
+        not_node = Node(self.a, '!', None)
+        most_left_or = Node(not_node, '|', self.c)
+        self.assertEqual(most_left_or, parse('!a|c'))
+
+    def test_crazy_wild_spacing(self):
+        or_node = Node(self.c, '|', self.d)
+        not_node = Node(self.a, '!', None)
+        and_node = Node(not_node, '&', or_node)
+        outer_not = Node(and_node, '!',None)
+        #!(!a&(c|d))
+        self.assertEqual(outer_not, parse(' ! (    !  a& ( c | d ) )      '))
+
 
 
     def test_char_index(self):
