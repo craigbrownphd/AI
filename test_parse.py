@@ -6,6 +6,12 @@ from Node import Node
 # ! & |
 class TestParse(TestCase):
 
+    def setUp(self):
+        self.a = Node(None, 'a',None)
+        self.b = Node(None, 'b',None)
+        self.c = Node(None, 'c',None)
+        self.d = Node(None, 'd',None)
+
     def test_parse_empty(self):
         self.assertEqual(None ,parse(''))
         self.assertEqual(None, parse(None))
@@ -79,8 +85,19 @@ class TestParse(TestCase):
 
         self.assertEqual(or_node, parse('a|b|!(c&d)'))
 
+    def test_parse_simple_or_not_and(self):
+        a = Node(None, 'a', None)
+        b = Node(None, 'b', None)
+        c = Node(None, 'c', None)
+        d = Node(None,'d',None)
 
-    # todo:  a|(b&c)
+
+        and_node = Node(c, '&', d)
+        or_node = Node(a, '|',and_node)
+
+        self.assertEqual(or_node, parse('a|(b&c)'))
+
+
     # todo:  a|b&c
     # todo:  (a|b)&c
     # todo:  a|(b&(c|d))
