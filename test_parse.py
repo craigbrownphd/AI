@@ -166,6 +166,7 @@ class TestParse(TestCase):
         #!(!a&(c|d))
         self.assertEqual(outer_not, parse(' ! (    !  a& ( c | d ) )      '))
 
+    #todo: test valid letter input
 
 
     def test_char_index(self):
