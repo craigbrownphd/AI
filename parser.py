@@ -65,7 +65,7 @@ def parse(exp):
 
     special_index = char_index(exp)
     if special_index == -1:
-        assert len(exp) == 1
+        # assert len(exp) == 1
         return Node(None, exp, None)
     else:
         if exp[special_index] != '!':

@@ -168,6 +168,24 @@ class TestParse(TestCase):
 
     #todo: test valid letter input
 
+    def test_parse_long_variable_name(self):
+        a = Node(None, 'alha', None)
+        self.assertEqual(a, parse('alha'))
+
+
+    def test_crazy_wild_spacing_with_long_names(self):
+        a = Node(None, 'alpha', None)
+        d = Node(None, 'dennis', None)
+        c = Node(None, 'charlie', None)
+
+
+        or_node = Node(c, '|', d)
+        not_node = Node(a, '!', None)
+        and_node = Node(not_node, '&', or_node)
+        outer_not = Node(and_node, '!',None)
+        #!(!a&(c|d))
+        self.assertEqual(outer_not, parse(' ! (    !  alpha& ( charlie | dennis ) )      '))
+
 
     def test_char_index(self):
         mydict = {

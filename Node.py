@@ -10,7 +10,7 @@ class Node(object):
     def __init__(self, left, value, right):
         assert isinstance(left, Node) or left is None
         assert isinstance(right, Node) or right is None
-        assert isinstance(value, str) and len(value) is 1
+        # assert isinstance(value, str) and len(value) is 1
 
         if value not in ['!', '&', '|']:
             assert left is None
