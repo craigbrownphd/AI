@@ -1,5 +1,5 @@
 from unittest import TestCase
-from evaler import eval
+from evaler import evaluate
 import parser
 
 __author__ = 'himanshu'
@@ -14,14 +14,14 @@ class TestEval(TestCase):
             'a': True
         }
         root = parser.parse('a')
-        result = eval(root, defined_variables)
+        result = evaluate(root, defined_variables)
         self.assertEqual(result, True)
 
         defined_variables = {
             'a': False
         }
         root = parser.parse('a')
-        result = eval(root, defined_variables)
+        result = evaluate(root, defined_variables)
         self.assertEqual(result, False)
 
 
@@ -31,14 +31,14 @@ class TestEval(TestCase):
             'alpha': True
         }
         root = parser.parse('!alpha')
-        result = eval(root, defined_variables)
+        result = evaluate(root, defined_variables)
         self.assertEqual(result, False)
     
         defined_variables = {
             'alpha': False
         }
         root = parser.parse('!alpha')
-        result = eval(root, defined_variables)
+        result = evaluate(root, defined_variables)
         self.assertEqual(result, True)
     
     
@@ -48,7 +48,7 @@ class TestEval(TestCase):
             'b':False
         }
         root = parser.parse('alpha|b')
-        result = eval(root, defined_variables)
+        result = evaluate(root, defined_variables)
         self.assertEqual(result, False)
 
         defined_variables = {
@@ -56,7 +56,7 @@ class TestEval(TestCase):
             'b':True
         }
         root = parser.parse('alpha|b')
-        result = eval(root, defined_variables)
+        result = evaluate(root, defined_variables)
         self.assertEqual(result, True)
 
 
@@ -65,7 +65,7 @@ class TestEval(TestCase):
             'b':False
         }
         root = parser.parse('alpha|b')
-        result = eval(root, defined_variables)
+        result = evaluate(root, defined_variables)
         self.assertEqual(result, True)
 
         defined_variables = {
@@ -73,7 +73,7 @@ class TestEval(TestCase):
             'b':True
         }
         root = parser.parse('alpha|b')
-        result = eval(root, defined_variables)
+        result = evaluate(root, defined_variables)
         self.assertEqual(result, True)
 
 
@@ -83,7 +83,7 @@ class TestEval(TestCase):
             'b':False
         }
         root = parser.parse('alpha&b')
-        result = eval(root, defined_variables)
+        result = evaluate(root, defined_variables)
         self.assertEqual(result, False)
 
         defined_variables = {
@@ -91,7 +91,7 @@ class TestEval(TestCase):
             'b':True
         }
         root = parser.parse('alpha&b')
-        result = eval(root, defined_variables)
+        result = evaluate(root, defined_variables)
         self.assertEqual(result, False)
 
 
@@ -100,7 +100,7 @@ class TestEval(TestCase):
             'b':False
         }
         root = parser.parse('alpha&b')
-        result = eval(root, defined_variables)
+        result = evaluate(root, defined_variables)
         self.assertEqual(result, False)
 
         defined_variables = {
@@ -108,7 +108,7 @@ class TestEval(TestCase):
             'b':True
         }
         root = parser.parse('alpha&b')
-        result = eval(root, defined_variables)
+        result = evaluate(root, defined_variables)
         self.assertEqual(result, True)
 
 

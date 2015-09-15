@@ -1,0 +1,9 @@
+Teach -R a = "some value"
+Teach -L b = "some value1"
+Teach -R c = "somevalue2"
+Teach -L d = "some value3"
+Teach a = true
+Teach a -> b
+Teach a -> d
+learn
+list
