@@ -3,6 +3,6 @@ Teach -L b = "some value1"
 Teach a = false
 Teach a -> b
 learn
-why b
+list
 teach a = true
-why b
+why a&b

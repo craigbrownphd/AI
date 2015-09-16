@@ -61,6 +61,10 @@ def assign(line):
     decision = lambda v: True if v == 'true' else False
     if tokens[1] in root_variables:
         facts[tokens[1]] = decision(tokens[3].lower())
+        for var in facts.keys():
+            if var in learned_variables:
+                facts[var] = False
+        # print(facts)
 
 def teach_rule(line):
     if_part = line.split(' ')[1]
@@ -112,104 +116,142 @@ I KNOW THAT "V"
 I THUS KNOW THAT (("S") AND "V")
 """
 
-
+output_string = ""
 
 def backtrack(node, facts):
+    global output_string
     assert node is not None
+    if node.value in root_variables.keys():
+        # ROOT. THIS reveals root decision
+        output_string += ('I KNOW IT IS {} THAT {}'.format(
+            'TRUE' if facts[node.value] else 'NOT TRUE',
+            variables[node.value]
+            )
+        ) + '\n'
+        return facts[node.value]
 
     for rule in rules:
-        if rule[1] == node.value:
-            if node.value in root_variables.keys():
-                # ROOT. THIS reveals root decision
-                print('I KNOW IT IS {} THAT {}'.format(
-                    'TRUE' if facts[node.value] else 'NOT TRUE',
-                    node.value
-                )
-                )
-                return facts[node.value]
-            else:
+        # if rule[1] == node.value:
+
+            if_part = parse(rule[0])
+            if if_part.value in ['!','&','|']:
                 message = 'BECAUSE IT IS {} THAT {} I {} PROVE {}'
-                if node.value == '!':
-                    result = not backtrack(node.left, facts)
+                if if_part.value == '!':
+                    result = not backtrack(if_part.left, facts)
                     if result:
-                        print(message.format(
+                        output_string += (message.format(
                             'NOT TRUE',
-                            variables[node.left.value],
+                            variables[if_part.left.value],
                             'CAN',
-                            variables[node.value]
-                        ))
+                            variables[if_part.value]
+                        )) + '\n'
                         return True
                     else:
-                        print(message.format(
+                        output_string += (message.format(
                             'TRUE',
-                            variables[node.left.value],
+                            variables[if_part.left.value],
                             'CANNOT',
-                            variables[node.value]
-                        ))
+                            variables[if_part.value]
+                        )) + '\n'
                         return False
 
 
-            if node.value in ['|', '&']:
-                if node.value == '|':
-                    back_track_left = backtrack(node.left, facts)
-                    if back_track_left:
-                        print(message.format(
-                            'TRUE',
-                            '{} OR {}'.format(variables[node.left.value], variables[node.right.value]),
-                            'CAN',
-                            variables[node.value]
-                        ))
-                        return True
-                    else:
-                        back_track_right = backtrack(node.right, facts)
-                        if back_track_right:
-                            print(message.format(
+                if if_part.value in ['|', '&']:
+                    if if_part.value == '|':
+                        back_track_left = backtrack(if_part.left, facts)
+                        if back_track_left:
+                            output_string += (message.format(
                                 'TRUE',
-                                '{} OR {}'.format(variables[node.left.value], variables[node.right.value]),
+                                '{} OR {}'.format(variables[if_part.left.value], variables[if_part.right.value]),
                                 'CAN',
-                                variables[node.value]
-                            ))
-                            return True
-                        print(message.format(
-                            'NOT TRUE',
-                            '{} OR {}'.format(variables[node.left.value], variables[node.right.value]),
-                            'CANNOT',
-                            variables[node.value]
-                        ))
-                        return False
-                elif node.value == '&':
-                    back_track_left = backtrack(node.left, facts)
-                    if back_track_left:
-                        back_track_right = backtrack(node.right, facts)
-                        if back_track_right:
-                            print(message.format(
-                                'TRUE',
-                                '{} AND {}'.format(variables[node.left.value], variables[node.right.value]),
-                                'CAN',
-                                variables[node.value]
-                            ))
+                                variables[if_part.value]
+                            )) + '\n'
                             return True
                         else:
-                            print(message.format(
+                            back_track_right = backtrack(if_part.right, facts)
+                            if back_track_right:
+                                output_string += (message.format(
+                                    'TRUE',
+                                    '{} OR {}'.format(variables[if_part.left.value], variables[if_part.right.value]),
+                                    'CAN',
+                                    variables[if_part.value]
+                                )) + '\n'
+                                return True
+                            output_string += (message.format(
                                 'NOT TRUE',
-                                '{} AND {}'.format(variables[node.left.value], variables[node.right.value]),
+                                '{} OR {}'.format(variables[if_part.left.value], variables[if_part.right.value]),
                                 'CANNOT',
-                                variables[node.value]
-                            ))
+                                variables[if_part.value]
+                            )) + '\n'
                             return False
-                    else:
-                        print(message.format(
-                            'NOT TRUE',
-                            '{} AND {}'.format(variables[node.left.value], variables[node.right.value]),
-                            'CANNOT',
-                            variables[node.value]
-                        ))
-                        return False
+                    elif if_part.value == '&':
+                        back_track_left = backtrack(if_part.left, facts)
+                        if back_track_left:
+                            back_track_right = backtrack(if_part.right, facts)
+                            if back_track_right:
+                                output_string += (message.format(
+                                    'TRUE',
+                                    '{} AND {}'.format(variables[if_part.left.value], variables[if_part.right.value]),
+                                    'CAN',
+                                    variables[if_part.value]
+                                )) + '\n'
+                                return True
+                            else:
+                                output_string += (message.format(
+                                    'NOT TRUE',
+                                    '{} AND {}'.format(variables[if_part.left.value], variables[if_part.right.value]),
+                                    'CANNOT',
+                                    variables[if_part.value]
+                                )) + '\n'
+                                return False
+                        else:
+                            output_string+=(message.format(
+                                'NOT TRUE',
+                                '{} AND {}'.format(variables[if_part.left.value], variables[if_part.right.value]),
+                                'CANNOT',
+                                variables[if_part.value]
+                            ))+'\n'
+                            return False
+            else:
+
+                # print(facts)
+                # print(backtrack(if_part, facts))
+                res = backtrack(if_part, facts)
+                message = 'BECAUSE IT IS {} THAT {}, I {} PROVE {}'
+                output_string+=(message.format(
+                    'TRUE' if res else 'NOT TRUE',
+                    variables[if_part.value],
+                    'CAN' if res else 'CANNOT',
+                    variables[rule[1]]
+
+                ))+'\n'
+                return res
+
+
 
 def why(line):
+    global output_string
+    output_string = ""
     exp = line.split(' ')[1]
-    backtrack(parse(exp), facts)
+    result = backtrack(parse(exp), facts)
+    message = 'THUS I {} PROVE ({})'
+    print str(result).lower()
+    print(output_string[:-1])
+    print(message.format(
+        'CAN' if result else 'CANNOT',
+        node_to_string(parse(exp))
+    ))
 
+def node_to_string(root):
+
+    if root.value == '!':
+        return "NOT ({})".format(node_to_string(root.left))
+    elif root.value == '|':
+        return "{} OR {}".format(node_to_string(root.left), node_to_string(root.right))
+    elif root.value == '&':
+        return "{} AND {}".format(node_to_string(root.left), node_to_string(root.right))
+    else:
+        return variables[root.value]
 
 if __name__=='__main__':
 
@@ -231,7 +273,6 @@ if __name__=='__main__':
             why(line)
         else:
             print('ERROR IN LINE: {myline}'.format(myline=line))
-            break
 
 
 
