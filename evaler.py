@@ -13,3 +13,6 @@ def evaluate(root, facts):
 
     return facts[root.value]
 
+
+
+
