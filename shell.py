@@ -18,11 +18,11 @@ rules = []  # [ (if expression, then expression)... ]
 def list():
     print('Root Variables:')
     for k,v in root_variables.items():
-        print("\t{}={}".format(k,v))
+        print("\t{} = {}".format(k,v))
 
     print('Learned Variables:')
     for k,v in learned_variables.items():
-        print("\t{}={}".format(k,v))
+        print("\t{} = {}".format(k,v))
 
     print('Facts:')
     for k in root_variables.keys():
@@ -31,7 +31,7 @@ def list():
 
     print('Rules:')
     for rule in rules:
-        print("\t{}->{}".format(rule[0], rule[1]))
+        print("\t{} -> {}".format(rule[0], rule[1]))
 
 def teach(line):
     if '->' in line:
@@ -59,12 +59,15 @@ def teach_variable(line, is_root):
 def assign(line):
     tokens = line.split(' ')
     decision = lambda v: True if v == 'true' else False
+
     if tokens[1] in root_variables:
         facts[tokens[1]] = decision(tokens[3].lower())
         for var in facts.keys():
             if var in learned_variables:
                 facts[var] = False
         # print(facts)
+    else:
+        raise TypeError
 
 def teach_rule(line):
     if_part = line.split(' ')[1]
@@ -253,8 +256,7 @@ def node_to_string(root):
     else:
         return variables[root.value]
 
-if __name__=='__main__':
-
+def main():
     while True:
         try:
             line = raw_input('')
@@ -273,6 +275,11 @@ if __name__=='__main__':
             why(line)
         else:
             print('ERROR IN LINE: {myline}'.format(myline=line))
+
+if __name__=='__main__':
+    main()
+
+
 
 
 

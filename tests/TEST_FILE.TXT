@@ -1,6 +1,2 @@
-Teach -R a = "some value"
-Teach -L b = "some value1"
-Teach a = true
-Teach a -> b
-learn
-list
+Teach -L a = "a"
+Teach a = false

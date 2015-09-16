@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "shell.py", line 280, in <module>
+    main()
+  File "shell.py", line 267, in main
+    teach(line)
+  File "shell.py", line 44, in teach
+    assign(line)
+  File "shell.py", line 70, in assign
+    raise TypeError
+TypeError
