@@ -1,7 +1,7 @@
 Traceback (most recent call last):
-  File "shell.py", line 280, in <module>
+  File "shell.py", line 281, in <module>
     main()
-  File "shell.py", line 267, in main
+  File "shell.py", line 268, in main
     teach(line)
   File "shell.py", line 44, in teach
     assign(line)

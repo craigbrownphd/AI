@@ -92,10 +92,10 @@ Facts:
 \ta
 Rules:
 \ta -> b
-True
-True
-True
-False
+true
+true
+true
+false
 Root Variables:
 \ta = "some value"
 Learned Variables:
@@ -223,15 +223,13 @@ Rules:
             "Teach -R a = \"a\"",
             "Teach -L b = \"b\"",
             "Teach a -> b",
-            "list"
+            "list",
+            "query b"
         ])
         self.run_code()
         self.outputEquals(
-            "Root Variables:\n\ta = \"a\"\nLearned Variables:\n\tb = \"b\"\nFacts:\nRules:\n\ta -> b"
+            "Root Variables:\n\ta = \"a\"\nLearned Variables:\n\tb = \"b\"\nFacts:\nRules:\n\ta -> b\nfalse"
         )
-
-
-
 
 
     #todo: we need to ignore invalid input. THIS INCLUDES INCORRRECT CASE!!!!!
