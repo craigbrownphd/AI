@@ -25,6 +25,7 @@ def list():
         print("\t{} = {}".format(k,v))
 
     print('Facts:')
+    # print(facts)
     for k in facts.keys():
         if facts[k]:
             print("\t{}".format(k))
@@ -52,6 +53,7 @@ def teach_variable(line, is_root):
     if variable in variables:
         return
 
+
     if is_root:
         root_variables[variable] = value
         variables[variable] = value
@@ -78,8 +80,7 @@ def assign(line):
 def teach_rule(line):
     if_part = line.split(' ')[1]
     then_part = line.split(' ')[3]
-
-    assert then_part in learned_variables
+    assert then_part in learned_variables.keys()
 
     rules.append( (if_part, then_part) )
 
@@ -93,6 +94,7 @@ def learn():
         for rule in rules:
             old = facts[rule[1]]
             facts[rule[1]] = evaluate( parse(rule[0]), facts)
+            # print('\n\n'+str(facts[rule[1]])+ '\n\n')
             if facts[rule[1]] != old:
                 changing = True
         if not changing:
