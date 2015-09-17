@@ -154,7 +154,7 @@ def backtrack(node, facts):
             if if_part.value in ['!','&','|']:
                 if if_part.value == '!':
                     result = not backtrack(if_part.left, facts)            
-                output_string += generateString(result, variables[if_part.left.value], variables[if_part.value])
+                    output_string += generateString(result, variables[if_part.left.value], variables[if_part.value])
                 if if_part.value in ['|', '&']:
                     if if_part.value == '|':
                         back_track_left = backtrack(if_part.left, facts)

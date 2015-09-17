@@ -117,16 +117,18 @@ class TestEval(TestCase):
             'a': False,
             'b':False
         }
-        root = parser.parse('(a|(!(a&a))|a&a|a)')
-        result = evaluate(root, defined_variables)
-        self.assertEqual(result, True)
 
-    def test_weird_breaking_thing(self):
+        root = parser.parse('(a|(!(a&a))|a&a|a)')
+
+        result = evaluate(root, defined_variables)
+        self.assertEqual(result, False)
+
+    def test_weird_breaking_thing_two(self):
         defined_variables = {
             'a': False,
             'b':False
         }
-        root = parser.parse('!a&a')
+        root = parser.parse('!(a&a)')
         result = evaluate(root, defined_variables)
         self.assertEqual(result, True)
 

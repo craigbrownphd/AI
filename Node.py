@@ -48,3 +48,4 @@ class Node(object):
                self.right == other.right and \
                self.value == other.value
 
+

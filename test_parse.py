@@ -200,3 +200,6 @@ class TestParse(TestCase):
         }
         for k,v in mydict.items():
             self.assertEquals(v, char_index(k), '{}->{}'.format(k,v))
+
+
+

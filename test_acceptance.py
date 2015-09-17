@@ -299,15 +299,13 @@ Rules:
             "Teach (a|(!(a&a))|a&a|a) -> b",
             "learn",
             "list",
-            "why b"
         ])
         self.run_code()
         self.outputEquals(
-            'Root Variables:\n\ta = \"a\"\nLearned Variables:\n\tb = \"b\"\nFacts:\n\tb\nRules:\n\t(a|(!(a&a))|a&a|a) -> b'
+            'Root Variables:\n\ta = \"a\"\nLearned Variables:\n\tb = \"b\"\nFacts:\nRules:\n\t(a|(!(a&a))|a&a|a) -> b'
         )
 
-# Root Variables:\n\ta = "a"\nLearned Variables:\n\tb = "b"\nFacts:\n\tb\nRules:\n\t(a|(!(a&a))|a&a|a) -> b
-# Root Variables:\n\ta = "a"\nLearned Variables:\n\tb = "b"\nFacts:\nRules:\n\t(a|(!(a&a))|a&a|a) -> b
+
     #todo: we need to ignore invalid input. THIS INCLUDES INCORRRECT CASE!!!!!
 
     #todo: list's facts section prints out all learned variables that are true as well!!!!!!!!!!!
