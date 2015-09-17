@@ -157,12 +157,12 @@ def backtrack(node, facts):
                     if if_part.value == '|':
                         back_track_left = backtrack(if_part.left, facts)
                         if back_track_left:
-                            output_string += generateString(True, '{} OR {}'.format(variables[if_part.left.value], variables[if_part.right.value]), variables[if_part.value])
+                            output_string += generateString(True, variables[if_part.left.value], variables[if_part.value])
                             return True
                         else:
                             back_track_right = backtrack(if_part.right, facts)
                             if back_track_right:
-                                output_string += generateString(True, '{} OR {}'.format(variables[if_part.left.value], variables[if_part.right.value]), variables[if_part.value])
+                                output_string += generateString(True,variables[if_part.right.value], variables[if_part.value])
                                 return True
                             output_string += generateString(False, '{} OR {}'.format(variables[if_part.left.value], variables[if_part.right.value]), variables[if_part.value])
                             return False
