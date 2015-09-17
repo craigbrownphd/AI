@@ -49,8 +49,8 @@ class TestAcceptance(TestCase):
             "Teach -L b = \"some value1\"",
             "Teach a = true",
             "Teach a -> b",
-            "learn",
-            "list"
+            "Learn",
+            "List"
         ])
         self.run_code()
         self.outputEquals(
@@ -75,12 +75,12 @@ Rules:
             "Teach -L b = \"some value1\"",
             "Teach a = true",
             "Teach a -> b",
-            "list",
-            "query a",
-            "query b",
-            "query a&b",
-            "query a&(!b)",
-            "list"
+            "List",
+            "Query a",
+            "Query b",
+            "Query a&b",
+            "Query a&(!b)",
+            "List"
         ])
         self.run_code()
         self.outputEquals(
@@ -112,7 +112,7 @@ Rules:
     def test_teach_string_has_spaces(self):
         self.create_file_with_contents([
             "Teach -R a = \"space in the middle\"",
-            "list"
+            "List"
         ])
         self.run_code()
         self.outputEquals(
@@ -127,7 +127,7 @@ Rules:
     def test_teach_new_value_is_false(self):
         self.create_file_with_contents([
             "Teach -R a = \"a\"",
-            "list"
+            "List"
         ])
         self.run_code()
         self.outputEquals(
@@ -144,7 +144,7 @@ Rules:
         self.create_file_with_contents([
             "Teach -R a = \"a\"",
             "Teach -R a = \"some other value\"",
-            "list"
+            "List"
         ])
         self.run_code()
         self.outputEquals(
@@ -176,7 +176,7 @@ Rules:
         for case in cases:
             self.create_file_with_contents([
                 "Teach -R a = \"{}\"".format(case),
-                "list"
+                "List"
             ])
             self.run_code()
             self.outputEquals(
@@ -197,7 +197,7 @@ Rules:
         for case in cases:
             self.create_file_with_contents([
                 "Teach -R a = \"{}\"".format(case),
-                "list"
+                "List"
             ])
             self.run_code()
             self.outputEquals(
@@ -208,7 +208,7 @@ Rules:
         self.create_file_with_contents([
             "Teach -R a = \"a\"",
             "Teach a = true",
-            "list"
+            "List"
         ])
         self.run_code()
         self.outputEquals(
@@ -219,7 +219,7 @@ Rules:
         self.create_file_with_contents([
             "Teach -R a = \"a\"",
             "Teach a = false",
-            "list"
+            "List"
         ])
         self.run_code()
         self.outputEquals(
@@ -240,8 +240,8 @@ Rules:
             "Teach -R a = \"a\"",
             "Teach -L b = \"b\"",
             "Teach a -> b",
-            "list",
-            "query b"
+            "List",
+            "Query b"
         ])
         self.run_code()
         self.outputEquals(
@@ -256,15 +256,15 @@ Rules:
             "Teach a = true",
             "Teach a -> b",
             "Teach a -> c",
-            "learn",
-            "query a",
-            "query b",
-            "query c",
+            "Learn",
+            "Query a",
+            "Query b",
+            "Query c",
             "Teach a = false",
             #note: don't need to learn
-            "query a",
-            "query b",
-            "query c"
+            "Query a",
+            "Query b",
+            "Query c"
         ])
         self.run_code()
         self.outputEquals(
@@ -279,11 +279,11 @@ Rules:
             "Teach a = true",
             "Teach a -> b",
             "Teach a -> c",
-            "learn",
-            "list",
+            "Learn",
+            "List",
             "Teach a = true",
             #note: don't need to learn
-            "list"
+            "List"
         ])
         self.run_code()
         learn_one = "Root Variables:\n\ta = \"a\"\nLearned Variables:\n\tb = \"b\"\n\tc = \"c\"\nFacts:\n\ta\n\tb\n\tc\nRules:\n\ta -> b\n\ta -> c"
@@ -297,8 +297,8 @@ Rules:
             "Teach -R a = \"a\"",
             "Teach -L b = \"b\"",
             "Teach (a|(!(a&a))|a&a|a) -> b",
-            "learn",
-            "list",
+            "Learn",
+            "List",
         ])
         self.run_code()
         self.outputEquals(
@@ -306,21 +306,84 @@ Rules:
         )
 
 
+    def test_teach_parenthesized(self):
+        self.create_file_with_contents([
+            "Teach -R a = \"a\"",
+            "Teach -L b = \"b\"",
+            "Teach (a) -> b",
+            "Learn",
+            "List",
+        ])
+        self.run_code()
+        self.outputEquals(
+            'Root Variables:\n\ta = \"a\"\nLearned Variables:\n\tb = \"b\"\nFacts:\nRules:\n\t(a) -> b'
+        )
+
+    def test_teach_unparenthesized(self):
+        self.create_file_with_contents([
+            "Teach -R a = \"a\"",
+            "Teach -L b = \"b\"",
+            "Teach a -> b",
+            "Learn",
+            "List",
+        ])
+        self.run_code()
+        self.outputEquals(
+            'Root Variables:\n\ta = \"a\"\nLearned Variables:\n\tb = \"b\"\nFacts:\nRules:\n\ta -> b'
+        )
+
+
+    def test_invalid_input(self):
+        self.create_file_with_contents([
+            "Teach -R a = \"a\"",
+            "Teach -L b = \"b\"",
+            "teach (a|(!(a&a))|a&a|a) -> b",
+            "Learn",
+            "List",
+        ])
+        self.run_code()
+        self.outputEquals(
+            'Root Variables:\n\ta = \"a\"\nLearned Variables:\n\tb = \"b\"\nFacts:\nRules:\n'
+        )
+
+    def test_list_facts_variables_rules_in_order(self):
+        self.create_file_with_contents([
+            "Teach -R a = \"a\"",
+            "Teach -L b = \"b\"",
+            "Teach -R c = \"c\"",
+            "Teach -L d = \"d\"",
+            "Teach -R e = \"e\"",
+            "Teach -L f = \"f\"",
+            "Teach c -> d",
+            "Teach a -> b",
+            "Teach e -> f",
+            "Teach a = true",
+            "Teach c = true",
+            "Teach e = true",
+            "Learn",
+            "List"
+        ])
+        self.run_code()
+        self.outputEquals(
+            'Root Variables:\n\ta = \"a\"\n\tc = \"c\"\n\te = \"e\"\nLearned Variables:\n\tb = \"b\"\n\td = \"d\"\n\tf = \"f\"\nFacts:\n\ta\n\tb\n\tc\n\td\n\te\n\tf\nRules:\n\tc -> d\n\ta -> b\n\te -> f'
+        )
+
     #todo: we need to ignore invalid input. THIS INCLUDES INCORRRECT CASE!!!!!
 
-    #todo: list's facts section prints out all learned variables that are true as well!!!!!!!!!!!
+    def test_possible_incorrect_sequence(self):
+        self.create_file_with_contents([
+            "Teach -L a = \"a\"",
+            "Teach -R b = \"b\"",
+            "Teach b -> a",
+            "Learn",
+            "Query a",
+            "Query b",
+            "Teach b = true",
+            "Query b",
+            "Query a",
+        ])
+        self.run_code()
+        self.outputEquals(
+            'false\nfalse\ntrue\ntrue'
+        )
 
-    #todo: this sequence is wrong?
-#         Teach -L a = "a"
-# Teach -R b = "b"
-# Teach b -> a
-# learn
-# query a
-# false
-# query b
-# false
-# Teach b = true
-# query b
-# true
-# query a
-# true

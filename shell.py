@@ -226,16 +226,16 @@ def main():
             line = raw_input('')
         except EOFError:
             break
-        command = line.split(' ')[0].lower()
-        if 'teach' == command:
+        command = line.split(' ')[0]
+        if 'Teach' == command:
             teach(line)
-        elif 'learn' == command:
+        elif 'Learn' == command:
             learn()
-        elif 'list' == command:
+        elif 'List' == command:
             list()
-        elif 'query' == command:
+        elif 'Query' == command:
             query(line)
-        elif 'why' == command:
+        elif 'Why' == command:
             why(line)
         else:
             #ignore invalid input
