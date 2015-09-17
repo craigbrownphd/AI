@@ -61,6 +61,7 @@ Learned Variables:
 	b = "some value1"
 Facts:
 	a
+	b
 Rules:
 	a -> b
 """
@@ -138,7 +139,7 @@ Facts:
 Rules:
 """
         )
-    #todo: UNCLEAR HOW TO HANDLE THIS!!! what do we do when some variable is taught twice???? throw eror?
+
     def test_teach_variable_cannot_be_used_twice(self):
         self.create_file_with_contents([
             "Teach -R a = \"a\"",
@@ -149,7 +150,7 @@ Rules:
         self.outputEquals(
 """
 Root Variables:
-\ta = "some other value"
+\ta = "a"
 Learned Variables:
 Facts:
 Rules:
@@ -171,6 +172,27 @@ Rules:
             upper_alphabet+upper_alphabet+upper_alphabet,
             lower_alphabet+lower_alphabet+lower_alphabet+'_'
 
+        ]
+        for case in cases:
+            self.create_file_with_contents([
+                "Teach -R a = \"{}\"".format(case),
+                "list"
+            ])
+            self.run_code()
+            self.outputEquals(
+                "Root Variables:\n\ta = \"{}\"\nLearned Variables:\nFacts:\nRules:".format(case)
+            )
+
+    def test_teach_variable_true_false_name(self):
+        cases = [
+            'true',
+            'True',
+            'TRUE',
+            'tRuE',
+            'false',
+            'FALSE',
+            'False',
+            'FaLsE'
         ]
         for case in cases:
             self.create_file_with_contents([
@@ -213,11 +235,6 @@ Rules:
         self.assert_code_failed()
 
 
-    def test_teach_resets_all_derived_variables(self):
-        #todo: implement me!
-        pass
-
-    # todo: do we need spaces around -> when printing?
     def test_teach_variable_basic(self):
         self.create_file_with_contents([
             "Teach -R a = \"a\"",
@@ -231,5 +248,81 @@ Rules:
             "Root Variables:\n\ta = \"a\"\nLearned Variables:\n\tb = \"b\"\nFacts:\nRules:\n\ta -> b\nfalse"
         )
 
+    def test_teach_resets_all_derived_variables_when_root_is_made_false(self):
+        self.create_file_with_contents([
+            "Teach -R a = \"a\"",
+            "Teach -L b = \"b\"",
+            "Teach -L c = \"c\"",
+            "Teach a = true",
+            "Teach a -> b",
+            "Teach a -> c",
+            "learn",
+            "query a",
+            "query b",
+            "query c",
+            "Teach a = false",
+            #note: don't need to learn
+            "query a",
+            "query b",
+            "query c"
+        ])
+        self.run_code()
+        self.outputEquals(
+            "true\ntrue\ntrue\nfalse\nfalse\nfalse"
+        )
+
+    def test_teach_resets_all_derived_variables_when_root_is_made_true(self):
+        self.create_file_with_contents([
+            "Teach -R a = \"a\"",
+            "Teach -L b = \"b\"",
+            "Teach -L c = \"c\"",
+            "Teach a = true",
+            "Teach a -> b",
+            "Teach a -> c",
+            "learn",
+            "list",
+            "Teach a = true",
+            #note: don't need to learn
+            "list"
+        ])
+        self.run_code()
+        learn_one = "Root Variables:\n\ta = \"a\"\nLearned Variables:\n\tb = \"b\"\n\tc = \"c\"\nFacts:\n\ta\n\tb\n\tc\nRules:\n\ta -> b\n\ta -> c"
+        learn_two = "Root Variables:\n\ta = \"a\"\nLearned Variables:\n\tb = \"b\"\n\tc = \"c\"\nFacts:\n\ta\nRules:\n\ta -> b\n\ta -> c"
+        self.outputEquals(
+            learn_one + '\n' + learn_two
+        )
+
+    def test_teach_with_and_or_not(self):
+        self.create_file_with_contents([
+            "Teach -R a = \"a\"",
+            "Teach -L b = \"b\"",
+            "Teach (a|(!(a&a))|a&a|a) -> b",
+            "learn",
+            "list"
+        ])
+        self.run_code()
+        self.outputEquals(
+            'Root Variables:\n\ta = \"a\"\nLearned Variables:\n\tb = \"b\"\nFacts:\n\tb\nRules:\n\t(a|(!(a&a))|a&a|a) -> b'
+        )
+
+# Root Variables:\n\ta = "a"\nLearned Variables:\n\tb = "b"\nFacts:\n\tb\nRules:\n\t(a|(!(a&a))|a&a|a) -> b\n\ta -> c
+# Root Variables:\n\ta = "a"\nLearned Variables:\n\tb = "b"\nFacts:\nRules:\n\t(a|(!(a&a))|a&a|a) -> b
 
     #todo: we need to ignore invalid input. THIS INCLUDES INCORRRECT CASE!!!!!
+
+    #todo: list's facts section prints out all learned variables that are true as well!!!!!!!!!!!
+
+    #todo: this sequence is wrong?
+#         Teach -L a = "a"
+# Teach -R b = "b"
+# Teach b -> a
+# learn
+# query a
+# false
+# query b
+# false
+# Teach b = true
+# query b
+# true
+# query a
+# true

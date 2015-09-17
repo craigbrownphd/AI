@@ -1,10 +1,10 @@
 Traceback (most recent call last):
-  File "shell.py", line 281, in <module>
+  File "shell.py", line 288, in <module>
     main()
-  File "shell.py", line 268, in main
+  File "shell.py", line 274, in main
     teach(line)
   File "shell.py", line 44, in teach
     assign(line)
-  File "shell.py", line 70, in assign
+  File "shell.py", line 76, in assign
     raise TypeError
 TypeError

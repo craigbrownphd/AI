@@ -6,7 +6,7 @@ from copy import copy
 root_variables = OrderedDict()
 learned_variables = OrderedDict()
 variables = {}
-facts = {}  # {varA:T. varB:F, } these are BOTH root variables and learned variables.
+facts = OrderedDict()  # {varA:T. varB:F, } these are BOTH root variables and learned variables.
 rules = []  # [ (if expression, then expression)... ]
 
 # memoization = {
@@ -25,7 +25,7 @@ def list():
         print("\t{} = {}".format(k,v))
 
     print('Facts:')
-    for k in root_variables.keys():
+    for k in facts.keys():
         if facts[k]:
             print("\t{}".format(k))
 
@@ -48,6 +48,10 @@ def teach_variable(line, is_root):
     variable = tokens[2]
     value = ' '.join(tokens[4:])
 
+    #ignore line if variable already exists.
+    if variable in variables:
+        return
+
     if is_root:
         root_variables[variable] = value
         variables[variable] = value
@@ -62,10 +66,12 @@ def assign(line):
 
     if tokens[1] in root_variables:
         facts[tokens[1]] = decision(tokens[3].lower())
+        #reset all learned variables.
         for var in facts.keys():
             if var in learned_variables:
                 facts[var] = False
-        # print(facts)
+
+
     else:
         raise TypeError
 
@@ -275,7 +281,8 @@ def main():
         elif 'why' == command:
             why(line)
         else:
-            print('ERROR IN LINE: {myline}'.format(myline=line))
+            #ignore invalid input
+            pass
 
 if __name__=='__main__':
     main()
@@ -285,4 +292,3 @@ if __name__=='__main__':
 
 
 
-#todo: make sure you check if user input is 'False', 'True'...
