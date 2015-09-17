@@ -97,7 +97,8 @@ def query(line):
     saved_facts = copy(facts)
     learn()
     exp = line.split(' ')[1]
-    print( evaluate(parse(exp), facts) )
+    res = evaluate(parse(exp), facts)
+    print( str(res).lower() )
     facts = saved_facts
 
 
