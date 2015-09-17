@@ -128,6 +128,11 @@ I THUS KNOW THAT (("S") AND "V")
 
 output_string = ""
 
+def generateString (is_true, left_string, string):
+    if is_true:
+        return 'BECAUSE {} I KNOW THAT {}\n'.format(left_string, string)
+    return 'BECAUSE IT IS NOT TRUE THAT {}, I CANNOT PROVE {}\n'.format(left_string, string)
+
 def backtrack(node, facts):
     global output_string
     assert node is not None
@@ -145,96 +150,43 @@ def backtrack(node, facts):
 
             if_part = parse(rule[0])
             if if_part.value in ['!','&','|']:
-                message = 'BECAUSE IT IS {} THAT {} I {} PROVE {}'
                 if if_part.value == '!':
-                    result = not backtrack(if_part.left, facts)
-                    if result:
-                        output_string += (message.format(
-                            'NOT TRUE',
-                            variables[if_part.left.value],
-                            'CAN',
-                            variables[if_part.value]
-                        )) + '\n'
-                        return True
-                    else:
-                        output_string += (message.format(
-                            'TRUE',
-                            variables[if_part.left.value],
-                            'CANNOT',
-                            variables[if_part.value]
-                        )) + '\n'
-                        return False
-
-
+                    result = not backtrack(if_part.left, facts)            
+                output_string += generateString(result, variables[if_part.left.value], variables[if_part.value])
                 if if_part.value in ['|', '&']:
                     if if_part.value == '|':
                         back_track_left = backtrack(if_part.left, facts)
                         if back_track_left:
-                            output_string += (message.format(
-                                'TRUE',
-                                '{} OR {}'.format(variables[if_part.left.value], variables[if_part.right.value]),
-                                'CAN',
-                                variables[if_part.value]
-                            )) + '\n'
+                            output_string += generateString(True, '{} OR {}'.format(variables[if_part.left.value], variables[if_part.right.value]), variables[if_part.value])
                             return True
                         else:
                             back_track_right = backtrack(if_part.right, facts)
                             if back_track_right:
-                                output_string += (message.format(
-                                    'TRUE',
-                                    '{} OR {}'.format(variables[if_part.left.value], variables[if_part.right.value]),
-                                    'CAN',
-                                    variables[if_part.value]
-                                )) + '\n'
+                                output_string += generateString(True, '{} OR {}'.format(variables[if_part.left.value], variables[if_part.right.value]), variables[if_part.value])
                                 return True
-                            output_string += (message.format(
-                                'NOT TRUE',
-                                '{} OR {}'.format(variables[if_part.left.value], variables[if_part.right.value]),
-                                'CANNOT',
-                                variables[if_part.value]
-                            )) + '\n'
+                            output_string += generateString(False, '{} OR {}'.format(variables[if_part.left.value], variables[if_part.right.value]), variables[if_part.value])
                             return False
                     elif if_part.value == '&':
                         back_track_left = backtrack(if_part.left, facts)
                         if back_track_left:
                             back_track_right = backtrack(if_part.right, facts)
                             if back_track_right:
-                                output_string += (message.format(
-                                    'TRUE',
-                                    '{} AND {}'.format(variables[if_part.left.value], variables[if_part.right.value]),
-                                    'CAN',
-                                    variables[if_part.value]
-                                )) + '\n'
+                                output_string += generateString(True, '{} AND {}'.format(variables[if_part.left.value], variables[if_part.right.value]), variables[if_part.value])
                                 return True
                             else:
-                                output_string += (message.format(
-                                    'NOT TRUE',
-                                    '{} AND {}'.format(variables[if_part.left.value], variables[if_part.right.value]),
-                                    'CANNOT',
-                                    variables[if_part.value]
-                                )) + '\n'
+                                output_string += generateString(False, '{} AND {}'.format(variables[if_part.left.value], variables[if_part.right.value]), variables[if_part.value])
                                 return False
                         else:
-                            output_string+=(message.format(
-                                'NOT TRUE',
-                                '{} AND {}'.format(variables[if_part.left.value], variables[if_part.right.value]),
-                                'CANNOT',
-                                variables[if_part.value]
-                            ))+'\n'
+                            output_string += generateString(False, '{} AND {}'.format(variables[if_part.left.value], variables[if_part.right.value]), variables[if_part.value])
                             return False
             else:
 
                 # print(facts)
                 # print(backtrack(if_part, facts))
                 res = backtrack(if_part, facts)
-                message = 'BECAUSE IT IS {} THAT {}, I {} PROVE {}'
-                output_string+=(message.format(
-                    'TRUE' if res else 'NOT TRUE',
-                    variables[if_part.value],
-                    'CAN' if res else 'CANNOT',
-                    variables[rule[1]]
+                output_string+= generateString(res, variables[if_part.value], variables[rule[1]])
 
-                ))+'\n'
+                generateString(res, variables[if_part.value], variables[rule[1]])
                 return res
 
 
@@ -247,9 +199,12 @@ def why(line):
     message = 'THUS I {} PROVE ({})'
     print str(result).lower()
     print(output_string[:-1])
-    print(message.format(
-        'CAN' if result else 'CANNOT',
-        node_to_string(parse(exp))
+    if result:
+        'I THUS KNOW THAT ' + node_to_string(parse(exp))
+    else:
+        print(message.format(
+            'CANNOT',
+            node_to_string(parse(exp))
     ))
 
 def node_to_string(root):
