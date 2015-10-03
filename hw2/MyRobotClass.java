@@ -9,7 +9,7 @@ import java.util.Comparator;
 
 public class MyRobotClass extends Robot{
   
-  
+  // Meta class contains the parent as well as the gcost
   class Meta{
     Point parent;
     int gCost;
@@ -40,8 +40,10 @@ public class MyRobotClass extends Robot{
   
   
   TreeMap<Point, Meta> openList = new TreeMap<Point, Meta>(new Comparator<Point>(){
-    
+
     @Override
+
+    // compare function used to order treemap
     public int compare(Point o1, Point o2) {
       assert openList.containsKey(o1);
       assert openList.containsKey(o2);
@@ -61,6 +63,7 @@ public class MyRobotClass extends Robot{
   HashMap<Point, Meta> closeList = new HashMap<Point, Meta>();
   Point dest;
   
+
   @Override
   public void travelToDestination(){
     
@@ -113,7 +116,9 @@ public class MyRobotClass extends Robot{
       
     }
   }
-  
+
+
+  // ping to determine where the destination is.
   public Point getDest(){
     for(int x=0;x<101;x++){
       for(int y=0;y<101;y++){
@@ -130,12 +135,14 @@ public class MyRobotClass extends Robot{
   }
   
   
-  
+  // if it's not in the closeList, can put on path
   public boolean canPutOnPath(Point p){
     if(!isValid(p)) return false;
     return !this.closeList.containsKey(p);
   }
-  
+
+
+  // ensures that a point is valid
   public boolean isValid(Point p){
     if(p==null) return false;
     if(p.getX() < 0 || p.getY()<0) return false;
@@ -150,7 +157,8 @@ public class MyRobotClass extends Robot{
     }     
     
   }
-  
+
+  // adjacentPoints gets a list of points next to the current one
   public List<Point> adjacentPoints(Point cur){
     assert this.closeList.containsKey(cur);
     List<Point> out = new ArrayList<Point>();
@@ -175,7 +183,7 @@ public class MyRobotClass extends Robot{
     return out;
   }
   
-  
+  // calculates total cost by adding gcost and hcost
   public int fCost(Point possible, Point dest){
     //f = g + h
     
@@ -218,29 +226,37 @@ public class MyRobotClass extends Robot{
       this.openList.put(p, new Meta(cur, curGCost+toAdd));
     }
   }
-  
+
+  // retrieve the gCost from the openList
   public int gCost(Point p){
     
     return this.openList.get(p).gCost;
     
   }
-  
+
+  // heuristic between point and destination
   public int hCost(Point possible, Point dest){
     return manhattan(possible, dest);
   }
-  
+
+  // used to retrieve heuristic between points
   public int manhattan(Point from, Point dest){
     int m= Math.abs(from.x-dest.x) + Math.abs(from.y-dest.y);
     return m;
   }
-  
+
+  // check if moving to a point requires a diagnol
   public boolean diagonal(Point a, Point b){
     return this.manhattan(a,b) > 1;
   }
   
   public static void main(String args[]) throws java.lang.Exception{
-    World myWorld = new World("TestCases/myInputFile2.txt", false);
-    myWorld.createGUI(100,100,100);
+    // MARIO'S
+    World myWorld = new World("./hw2/TestCases/myInputFile3.txt", false);
+    // HIMANSHU's
+    // World myWorld = new World("TestCases/myInputFile3.txt", false);
+
+    myWorld.createGUI(1000,1000,500);
     MyRobotClass myRobot = new MyRobotClass();
     myRobot.addToWorld(myWorld);
     
