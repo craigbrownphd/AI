@@ -1,6 +1,6 @@
 import world.*;
 import java.awt.Point;
-public class MyRobotClass extends Robot{
+public class MyTest extends Robot{
   
 
   @Override
@@ -10,9 +10,9 @@ public class MyRobotClass extends Robot{
   }
 
   public static void main(String args[]) throws java.lang.Exception{
-    World myWorld = new World("TestCases/myInputFile.txt", false);
+    World myWorld = new World("./TestCases/myInputFile1.txt", false);
     myWorld.createGUI(100,100,100);
-    MyRobotClass myRobot = new MyRobotClass();
+    MyTest myRobot = new MyTest();
     myRobot.addToWorld(myWorld);
     
     
