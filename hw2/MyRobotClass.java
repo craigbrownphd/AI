@@ -1,12 +1,13 @@
 import world.*;
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.lang.NullPointerException;
 import java.util.HashMap;
 
 public class MyRobotClass extends Robot{
-  
+
   // Meta class contains the parent as well as the gcost
   class Meta{
     Point parent;
@@ -14,6 +15,8 @@ public class MyRobotClass extends Robot{
     int hCost;
     public Meta(Point parent, int gCost){this.parent=parent; this.gCost=gCost; this.hCost=-1;}
   }
+
+  private World myWorld;
   
 //  public class FComparator implements Comparator {
 //    
@@ -36,10 +39,10 @@ public class MyRobotClass extends Robot{
   
   
   
-  
+  private String[][] worldRep;
   // things we have seen but haven't stepped on
   HashMap<Point, Meta> openListLookup = new HashMap<Point, Meta>();
-  ArrayList<Point> openList = new ArrayList<Point>();
+  HashSet<Point> openList = new HashSet<Point>();
     // compare function used to order treemap
 //    public int compare(Point o1, Point o2) {
 //      assert openListLookup.containsKey(o1);
@@ -61,11 +64,18 @@ public class MyRobotClass extends Robot{
   // things we've stepped on
   HashMap<Point, Meta> closeList = new HashMap<Point, Meta>();
   Point dest;
-  
 
-  @Override
-  public void travelToDestination(){
-    
+  public String pingMap(Point p) {
+    String pointVal = worldRep[((int) p.getY())] [(int)p.getX()];
+    if (pointVal!="") {
+      return pointVal;
+    }
+    else {
+      return super.pingMap(p);
+    }
+  }
+
+  public void travelCertain(){
     dest = this.getDest();
     Point start = this.getPosition();
     Point cur = start;
@@ -73,72 +83,69 @@ public class MyRobotClass extends Robot{
     closeList.put(start, new Meta(null, 0));
 
     // while we haven't made it to the endgoal
-    while(!cur.equals(dest)){
+    while(!cur.equals(dest)) {
 
 
       assert closeList.containsKey(cur);
       // for all adjacent points, update current
-      for(Point p: this.adjacentPoints(cur)){
+      for (Point p : this.adjacentPoints(cur)) {
         //put into list OR update it if it should be updated
         this.updateGCost(cur, p);
       }
-      
-      
+
+
       // the best point to move to next will have the best fcost
 
-      Point best = openList.get(0);
+      Point best = (Point) openList.toArray()[0];
       int i = 0;
-      for (Point p: openList) {
+      for (Point p : openList) {
         Meta pMeta = openListLookup.get(p);
         Meta bestMeta = openListLookup.get(best);
-        if (pMeta.gCost+pMeta.hCost<bestMeta.gCost+bestMeta.hCost){
+        pMeta.hCost = hCost(p, dest);
+        bestMeta.hCost = hCost(best, dest);
+        if (pMeta.gCost + pMeta.hCost < bestMeta.gCost + bestMeta.hCost) {
           best = p;
         }
         i++;
       }
 
 
-      
       assert openListLookup.containsKey(best);
       closeList.put(best, openListLookup.get(best));
       openListLookup.remove(best);
       openList.remove(best);
       cur = best;
-      
-//      super.move(best);
-      
-      
-      
-      ArrayList<Point> path = new ArrayList<Point>();
-      // cur is at dest at this point in code
-      while(cur != start){
-        path.add(0,cur);
-        cur = this.closeList.get(cur).parent;
-      }
-      for(Point p : path){
-        super.move(p);
-      }
-      
-      
-      
+
+    }
+
+    ArrayList<Point> path = new ArrayList<Point>();
+    // cur is at dest at this point in code
+    while(cur != start){
+      path.add(0,cur);
+      cur = this.closeList.get(cur).parent;
+    }
+    for(Point p : path){
+      super.move(p);
+    }
+  }
+
+  public void travelUncertain(){
+
+  }
+
+  @Override
+  public void travelToDestination(){
+    if (this.myWorld.getUncertain()){
+      travelUncertain();
+    } else {
+      travelCertain();
     }
   }
 
 
   // ping to determine where the destination is.
   public Point getDest(){
-    for(int x=0;x<101;x++){
-      for(int y=0;y<101;y++){
-        try{
-          Point p = new Point(x,y);
-          if(super.pingMap(p).equals("F")) return p;
-          
-        }catch(NullPointerException e){
-          //pass
-        }
-      }
-    }
-    return null;
+    return myWorld.getEndPos();
   }
   
   
@@ -247,17 +254,17 @@ public class MyRobotClass extends Robot{
     return m.gCost;
     
   }
+  @Override
+  public void addToWorld(World world) {
+    super.addToWorld(world);
+    this.myWorld = world;
+    this.worldRep = new String[this.myWorld.numRows()][this.myWorld.numCols()];
+  }
 
   // heuristic between point and destination
   public int hCost(Point possible, Point dest){
     // hcost is initialized to -1. If changed, return what
-    // we stored. Otherwise, calculate and store in Meta.
-    int stored = openListLookup.get(possible).hCost;
-    if (stored !=-1)
-      return stored;
-    int manhattanVal = manhattan(possible, dest);
-    openListLookup.get(possible).hCost=manhattanVal;
-    return manhattanVal;
+    return manhattan(possible, dest);
   }
 
   // used to retrieve heuristic between points
@@ -273,15 +280,15 @@ public class MyRobotClass extends Robot{
   
   public static void main(String args[]) throws java.lang.Exception{
     // MARIO'S
-    World myWorld = new World("./hw2/TestCases/myInputFile3.txt", false);
+    World myWorld = new World("./hw2/TestCases/myInputFile4.txt", true);
     // HIMANSHU's
     // World myWorld = new World("TestCases/myInputFile3.txt", false);
 
     myWorld.createGUI(1000,1000,500);
     MyRobotClass myRobot = new MyRobotClass();
     myRobot.addToWorld(myWorld);
-    
-    
+    myWorld.getUncertain();
+
     myRobot.travelToDestination();
     
   }
