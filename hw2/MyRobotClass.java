@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.lang.NullPointerException;
 import java.util.HashMap;
-import java.util.TreeMap;
-import java.util.Comparator;
 
 public class MyRobotClass extends Robot{
   
@@ -13,14 +11,15 @@ public class MyRobotClass extends Robot{
   class Meta{
     Point parent;
     int gCost;
-    public Meta(Point parent, int gCost){this.parent=parent; this.gCost=gCost;}
+    int hCost;
+    public Meta(Point parent, int gCost){this.parent=parent; this.gCost=gCost; this.hCost=-1;}
   }
   
 //  public class FComparator implements Comparator {
 //    
 //    public int compare(Point o1, Point o2) {
-//      assert openList.containsKey(o1);
-//      assert openList.containsKey(o2);
+//      assert openListLookup.containsKey(o1);
+//      assert openListLookup.containsKey(o2);
 //      
 //      if(o1==o2) return 0;
 //      if(o1.equals(o2)) return 0;
@@ -38,28 +37,28 @@ public class MyRobotClass extends Robot{
   
   
   
-  
-  TreeMap<Point, Meta> openList = new TreeMap<Point, Meta>(new Comparator<Point>(){
-
-    @Override
-
+  // things we have seen but haven't stepped on
+  HashMap<Point, Meta> openListLookup = new HashMap<Point, Meta>();
+  ArrayList<Point> openList = new ArrayList<Point>();
     // compare function used to order treemap
-    public int compare(Point o1, Point o2) {
-      assert openList.containsKey(o1);
-      assert openList.containsKey(o2);
-      
-      if(o1==o2) return 0;
-      if(o1.equals(o2)) return 0;
-      
-      int o1f = fCost(o1, dest);
-      int o2f = fCost(o2, dest);
-      if(o1f<o2f) return -1;
-      if(o1f>o2f) return 1;
-      return 0;
-      
-    }
+//    public int compare(Point o1, Point o2) {
+//      assert openListLookup.containsKey(o1);
+//      assert openListLookup.containsKey(o2);
+//
+//      if(o1==o2) return 0;
+//      if(o1.equals(o2)) return 0;
+//
+//      int o1f = fCost(o1, dest);
+//      int o2f = fCost(o2, dest);
+//      if(o1f<o2f) return -1;
+//      if(o1f>o2f) return 1;
+//      return 0;
+//
+//    }
     
-  });
+
+
+  // things we've stepped on
   HashMap<Point, Meta> closeList = new HashMap<Point, Meta>();
   Point dest;
   
@@ -70,31 +69,39 @@ public class MyRobotClass extends Robot{
     dest = this.getDest();
     Point start = this.getPosition();
     Point cur = start;
+    // since we start here, put to start
     closeList.put(start, new Meta(null, 0));
-    
+
+    // while we haven't made it to the endgoal
     while(!cur.equals(dest)){
-      
+
+
       assert closeList.containsKey(cur);
+      // for all adjacent points, update current
       for(Point p: this.adjacentPoints(cur)){
         //put into list OR update it if it should be updated
         this.updateGCost(cur, p);
       }
       
       
+      // the best point to move to next will have the best fcost
+
+      Point best = openList.get(0);
+      int i = 0;
+      for (Point p: openList) {
+        Meta pMeta = openListLookup.get(p);
+        Meta bestMeta = openListLookup.get(best);
+        if (pMeta.gCost+pMeta.hCost<bestMeta.gCost+bestMeta.hCost){
+          best = p;
+        }
+        i++;
+      }
+
+
       
-      Point best = this.openList.firstKey();
-      
-//      for(Point p: this.adjacentPoints(cur)){
-//        this.updateGCost(cur, p);
-//        int fcost = this.fCost(p, dest);
-//        if(fcost < min) {
-//          min = fcost;
-//          best = p;
-//        }
-//      }
-      
-      assert openList.containsKey(best);
-      closeList.put(best, openList.get(best));
+      assert openListLookup.containsKey(best);
+      closeList.put(best, openListLookup.get(best));
+      openListLookup.remove(best);
       openList.remove(best);
       cur = best;
       
@@ -213,30 +220,44 @@ public class MyRobotClass extends Robot{
      * 
      */
     assert this.closeList.containsKey(cur);
-    
+    // retrieve cost for current node
     int curGCost = this.closeList.get(cur).gCost;
     int toAdd = 1;//diagonal(cur,p)? 14:10;
-    if(this.openList.containsKey(p)){
-      int gCostWithOldParent = this.openList.get(p).gCost;
+
+    // if already seen
+    if(this.openListLookup.containsKey(p)){
+      // compare new gcost with old, only update if less
+      int gCostWithOldParent = this.openListLookup.get(p).gCost;
       if(curGCost+toAdd<gCostWithOldParent){
-        this.openList.put(p, new Meta(cur, curGCost+toAdd));
+        this.openListLookup.put(p, new Meta(cur, curGCost+toAdd));
+        this.openList.add(p);
       }
       
     } else {
-      this.openList.put(p, new Meta(cur, curGCost+toAdd));
+      // if we haven't put this before, set the parent as where we are and the
+      // gcost as the current cost plus one.
+      this.openListLookup.put(p, new Meta(cur, curGCost+toAdd));
+      this.openList.add(p);
     }
   }
 
-  // retrieve the gCost from the openList
+  // retrieve the gCost from the openListLookup
   public int gCost(Point p){
-    
-    return this.openList.get(p).gCost;
+    Meta m = this.openListLookup.get(p);
+    return m.gCost;
     
   }
 
   // heuristic between point and destination
   public int hCost(Point possible, Point dest){
-    return manhattan(possible, dest);
+    // hcost is initialized to -1. If changed, return what
+    // we stored. Otherwise, calculate and store in Meta.
+    int stored = openListLookup.get(possible).hCost;
+    if (stored !=-1)
+      return stored;
+    int manhattanVal = manhattan(possible, dest);
+    openListLookup.get(possible).hCost=manhattanVal;
+    return manhattanVal;
   }
 
   // used to retrieve heuristic between points
