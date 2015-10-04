@@ -66,13 +66,17 @@ public class MyRobotClass extends Robot{
   Point dest;
 
   public String pingMap(Point p) {
-    String pointVal = worldRep[((int) p.getY())] [(int)p.getX()];
-    if (pointVal!="") {
-      return pointVal;
+    String pointVal=null;
+    if (p.y<worldRep.length && p.x<worldRep[0].length){
+     pointVal = worldRep[p.y][p.x];
+     System.out.println("Cache " + pointVal);
+     if (pointVal != null) {
+        return pointVal;
+     }
+        worldRep[p.y][p.x] = super.pingMap(p);
+     pointVal=worldRep[p.y][p.x];
     }
-    else {
-      return super.pingMap(p);
-    }
+    return pointVal;
   }
 
   public void travelCertain(){
@@ -163,7 +167,7 @@ public class MyRobotClass extends Robot{
     
     try{
       
-      String val = super.pingMap(p);
+      String val = this.pingMap(p);
       return val.equals("O") || val.equals("F");
       
     } catch (NullPointerException e){
@@ -282,7 +286,7 @@ public class MyRobotClass extends Robot{
     // MARIO'S
     World myWorld = new World("./hw2/TestCases/myInputFile4.txt", true);
     // HIMANSHU's
-    // World myWorld = new World("TestCases/myInputFile3.txt", false);
+    // World myWorld = new World("TestCases/myInputFile4.txt", false);
 
     myWorld.createGUI(1000,1000,500);
     MyRobotClass myRobot = new MyRobotClass();
@@ -292,5 +296,5 @@ public class MyRobotClass extends Robot{
     myRobot.travelToDestination();
     
   }
-  
 }
+
