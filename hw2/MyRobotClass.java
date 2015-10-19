@@ -69,11 +69,10 @@ public class MyRobotClass extends Robot{
     String pointVal=null;
     if (p.y<worldRep.length && p.x<worldRep[0].length){
      pointVal = worldRep[p.y][p.x];
-     System.out.println("Cache " + pointVal);
      if (pointVal != null) {
         return pointVal;
      }
-        worldRep[p.y][p.x] = super.pingMap(p);
+     worldRep[p.y][p.x] = super.pingMap(p);
      pointVal=worldRep[p.y][p.x];
     }
     return pointVal;
@@ -284,9 +283,9 @@ public class MyRobotClass extends Robot{
   
   public static void main(String args[]) throws java.lang.Exception{
     // MARIO'S
-    World myWorld = new World("./hw2/TestCases/myInputFile4.txt", true);
+    // World myWorld = new World("./hw2/TestCases/myInputFile2.txt", true);
     // HIMANSHU's
-    // World myWorld = new World("TestCases/myInputFile4.txt", false);
+    World myWorld = new World("TestCases/myInputFile2.txt", false);
 
     myWorld.createGUI(1000,1000,500);
     MyRobotClass myRobot = new MyRobotClass();
