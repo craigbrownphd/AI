@@ -1,0 +1,8 @@
+Teach -R a = "some value"
+Teach -L b = "some value1"
+Teach a = false
+Teach a -> b
+learn
+list
+teach a = true
+why a&b
