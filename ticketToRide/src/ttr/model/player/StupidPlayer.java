@@ -2,12 +2,20 @@ package ttr.model.player;
 
 import ttr.model.destinationCards.Destination;
 import ttr.model.destinationCards.Route;
+import ttr.model.destinationCards.Routes;
+import ttr.model.trainCards.TrainCard;
 import ttr.model.trainCards.TrainCardColor;
+import ttr.view.gameComponents.TrainCardDeckView;
+
+import java.util.ArrayList;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * A very stupid player that simply draws train cards only. Shown as an example of implemented a player.
  * */
 public class StupidPlayer extends Player{
+
 
 	/**
 	 * Need to have this constructor so the player has a name, you can use no parameters and pass the name of your player
@@ -59,20 +67,23 @@ public class StupidPlayer extends Player{
     * 3) to determine if we can claim route, we see if see
     *       if num trains of proper color needed for route is <= players num trains of proper color
     * 4) how to get all possible routes????
-    *       isValidRoute(route)
-    *       isValidRoute(dest1, dest2, color)
-    *       isRouteClaimed(route)
-    *       claimRoute(route, player)
-    *       getAllRoutes()
-    *       getRoutes(dest1, dest2)
-    *       getOwner(route)
-    *       ownsRoute(player, route)
-    *       shortestPathcost(dest1, dest2)
-    *       hasCompletedRoute(player, dest1, dest2)
-    *       getNeighbors(dest)
-    *       getNeighborsByClaimedPlayer(player, dest)
-    *       getInstance()
-    * 5) how to get all possible cities????
+    *       Routes.isValidRoute(route)
+    *       Routes.isValidRoute(dest1, dest2, color)
+    *       Routes.isRouteClaimed(route)
+    *       Routes.claimRoute(route, player)
+    *****   Routes.getAllRoutes()
+    *       Routes.getRoutes(dest1, dest2)
+    *       Routes.getOwner(route)
+    *       Routes.ownsRoute(player, route)
+    *       Routes.shortestPathcost(dest1, dest2)
+    *       Routes.hasCompletedRoute(player, dest1, dest2)
+    *       Routes.getNeighbors(dest)
+    *       Routes.getNeighborsByClaimedPlayer(player, dest)
+    *       Routes.getInstance()
+    * 5) how to get all cards that I have
+    ****	Player.getNumTrainCardsByColor
+    * 		Player.claimRoute
+    * 		Player.getNumTrainCardsByColor
     *
     *
     *
@@ -81,6 +92,73 @@ public class StupidPlayer extends Player{
     * */
 
 
+	/*
+	* Given specific route, do we have enough cards in the correct color for it
+	* */
+	public boolean canClaimRoute(Route r){
+		return this.getNumTrainCardsByColor(r.getColor()) >= r.getCost() && !Routes.getInstance().isRouteClaimed(r);
+	}
+
+
+	/*
+	* select a route to claim. Returns the route that we just claimed IF we can.
+	* return null if no routes can be claimed
+	* */
+	public Route selectRouteToClaim() {
+		for(Route r: getAvailableRoutes()){
+            super.claimRoute(r, r.getColor());
+            return r;
+		}
+		return null;
+	}
+
+    public ArrayList<Route> getAvailableRoutes(){
+        ArrayList<Route> out = new ArrayList<Route>();
+        for(Route r : Routes.getInstance().getAllRoutes()){
+            if(this.canClaimRoute(r)){
+                out.add(r);
+            }
+        }
+        return out;
+    }
+
+
+    public TrainCard pickFaceupCard(){
+        //quantity for a routes - quantity for in hand
+        //color  -> quantity of color that is needed
+        SortedMap<TrainCardColor, Integer> quantityWeNeed = new TreeMap<TrainCardColor, Integer>();
+        for(Route r: getAvailableRoutes()){
+            int possibleNewQuantity = r.getCost() - this.getNumTrainCardsByColor(r.getColor());
+            if(quantityWeNeed.containsKey(r.getColor())){
+                if(possibleNewQuantity < quantityWeNeed.get(r.getColor())){
+                    quantityWeNeed.put(r.getColor(), possibleNewQuantity);
+                }
+            }else {
+                quantityWeNeed.put(r.getColor(), possibleNewQuantity);
+            }
+        }
+
+        ArrayList<TrainCard> faceUpCards = this.getFaceUpCards();
+        for(TrainCardColor k: quantityWeNeed.keySet()){
+
+            for(int i=0; i<faceUpCards.size();i++){
+                TrainCard c = faceUpCards.get(i);
+                TrainCardColor color = c.getColor();
+                if(k == color){
+                    super.drawTrainCard(1+i); // ASSUMPTION: 0-deck, 1-first faceup card, 5-5th face up card
+                    return c;
+                }
+            }
+
+        }
+        return null;
+
+    }
+
+    //controller that determines which of the 3 moves to make
+    //if claim route, use rainbow card or not?
+    //class for nodes for markov decision chain
+    //how to get
 
 
 }
