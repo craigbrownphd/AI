@@ -1,3 +1,0 @@
-Teach -R root_variable = "some value"
-Teach -L learned_variable = "some value2"
-list

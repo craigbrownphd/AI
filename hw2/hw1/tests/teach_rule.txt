@@ -1,4 +1,0 @@
-TEACH -R a = "something"
-TEACH -R b = "something"
-TEACH a -> b
-list

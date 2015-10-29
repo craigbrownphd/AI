@@ -1,6 +1,0 @@
-Teach -R a = "some value"
-Teach -L b = "some value1"
-Teach a = true
-Teach a -> b
-Query b
-list

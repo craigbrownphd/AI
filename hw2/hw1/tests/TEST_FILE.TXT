@@ -1,2 +1,0 @@
-Teach -L a = "a"
-Teach a = false

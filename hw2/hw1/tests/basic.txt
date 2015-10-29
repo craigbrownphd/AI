@@ -1,2 +1,0 @@
-Teach -R myname = "some value"
-list
