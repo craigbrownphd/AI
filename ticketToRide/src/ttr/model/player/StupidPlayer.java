@@ -156,7 +156,7 @@ public class StupidPlayer extends Player{
     }
 
     //controller that determines which of the 3 moves to make
-    //if claim route, use rainbow card or not?
+    //if claim route, use rainbow card or not
     //class for nodes for markov decision chain
     //how to get
 
