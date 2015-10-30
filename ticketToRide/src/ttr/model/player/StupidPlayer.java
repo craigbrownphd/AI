@@ -31,10 +31,17 @@ class DummyPlayer{
         faceUp=list;
     }
 
-    public void makeMove(){
-
+    public void addCard(TrainCard t){
+        hand.add(t);
+        faceUp.remove(t);
     }
 
+    public void claimRoute(Route r){
+        claimedRoutes.add(r);
+        points+=r.getPoints();
+        numTrainPieces-=r.getCost();
+
+    }
 
     ArrayList <TrainCard> faceUp;
 
@@ -137,7 +144,7 @@ class StateNode {
         ArrayList<StateNode> children = new ArrayList<StateNode>();
         for (TrainCard t: currentNode.state.us.faceUp) {
             StateNode newNode = new StateNode(currentNode);
-            newNode.state.us.hand.add(t);
+            newNode.state.us.addCard(t);
             children.add(newNode);
         }
 
@@ -146,7 +153,7 @@ class StateNode {
             for (Route r: currentNode.state.us.getAvailableRoutes()){
                 if (t.getLength() == r.getCost() && t.getColor() == r.getColor()) {
                     StateNode newNode = new StateNode(currentNode);
-                    newNode.state.us.claimedRoutes.add(r);
+                    newNode.state.us.claimRoute(r);
                     children.add(newNode);
                 }
             }
