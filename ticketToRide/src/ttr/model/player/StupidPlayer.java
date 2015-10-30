@@ -1,22 +1,17 @@
 package ttr.model.player;
 
-import ttr.model.destinationCards.Destination;
 import ttr.model.destinationCards.DestinationTicket;
 import ttr.model.destinationCards.Route;
 import ttr.model.destinationCards.Routes;
 import ttr.model.trainCards.TrainCard;
 import ttr.model.trainCards.TrainCardColor;
-import ttr.view.gameComponents.TrainCardDeckView;
-import ttr.view.scenes.TTRGamePlayScene;
-
-import java.lang.reflect.Array;
 import java.util.*;
 
 /**
  * A very stupid player that simply draws train cards only. Shown as an example of implemented a player.
  * */
 
-class DummyPlayer{
+class DummyPlayer {
 
     public DummyPlayer(){
 
@@ -62,13 +57,12 @@ class DummyPlayer{
     ArrayList<Route> claimedRoutes;
 
     public ArrayList<Route> getAvailableRoutes(){
+        ArrayList<Route> availableRoutes = Routes.getInstance().getAllRoutes();
         ArrayList<Route> out = new ArrayList<Route>();
-        for(Route r : Routes.getInstance().getAllRoutes()){
-            if(this.canClaimRoute(r)){
-                out.add(r);
-            }
+        for(Route r : claimedRoutes){
+            availableRoutes.remove(r);
         }
-        return out;
+        return availableRoutes;
     }
 
     public boolean canClaimRoute(Route r){
@@ -82,48 +76,20 @@ class DummyPlayer{
         }
         return count;
     }
-
-}
-
-class LengthColorTuple {
-    public TrainCardColor getColor() {
-        return color;
-    }
-
-    public void setColor(TrainCardColor color) {
-        this.color = color;
-    }
-
-    public int getLength() {
-        return length;
-    }
-
-    public void setLength(int length) {
-        this.length = length;
-    }
-
-    TrainCardColor color;
-    int length ;
-    public LengthColorTuple (int length, TrainCardColor c) {
-        this.color = c;
-        this.length = length;
-    }
-
 }
 
 class State {
-    HashMap<LengthColorTuple, Integer> tupleCounts;
     DummyPlayer us;
     DummyPlayer them;
 
-    public State (DummyPlayer us, DummyPlayer them, HashMap<LengthColorTuple, Integer> tupleCounts) {
-        this.tupleCounts = tupleCounts;
+    public State (DummyPlayer us, DummyPlayer them) {
         this.us = us;
         this.them = them;
     }
 }
 
 class StateNode {
+    boolean min = false;
     int value;
     State state;
     ArrayList<StateNode> children;
@@ -132,32 +98,35 @@ class StateNode {
         this.state = stateNode.state;
     }
 
-    public StateNode (State st, ArrayList<StateNode> children) {
+    public StateNode (State st) {
         this.state = st;
-        this.children=children;
     }
 
-    public ArrayList<StateNode> generateChildNodes(StateNode currentNode) {
+    public void setState (State st){
+        this.state = st;
+    }
+
+    public static ArrayList<StateNode> generateChildNodes(StateNode currentNode) {
+
         if (currentNode.state.us.numTrainPieces<=3)
             return new ArrayList<StateNode>();
 
         ArrayList<StateNode> children = new ArrayList<StateNode>();
-        for (TrainCard t: currentNode.state.us.faceUp) {
+        ArrayList<TrainCard> faceUp= (ArrayList<TrainCard>)currentNode.state.us.faceUp.clone();
+        for (TrainCard t: faceUp) {
             StateNode newNode = new StateNode(currentNode);
             newNode.state.us.addCard(t);
+            newNode.min = !currentNode.min;
             children.add(newNode);
         }
 
-        for (LengthColorTuple t: currentNode.state.tupleCounts.keySet()){
-            Collections.shuffle(currentNode.state.us.getAvailableRoutes());
-            for (Route r: currentNode.state.us.getAvailableRoutes()){
-                if (t.getLength() == r.getCost() && t.getColor() == r.getColor()) {
-                    StateNode newNode = new StateNode(currentNode);
-                    newNode.state.us.claimRoute(r);
-                    children.add(newNode);
-                }
-            }
+        for (Route r: currentNode.state.us.getAvailableRoutes()){
+            StateNode newNode = new StateNode(currentNode);
+            newNode.state.us.claimRoute(r);
+            newNode.min = !currentNode.min;
+            children.add(newNode);
         }
+
 
         return children;
     }
@@ -176,29 +145,22 @@ public class StupidPlayer extends Player{
 		super(name);
 	}
 
+    StateNode initial;
 	/**
 	 * MUST override the makeMove() method and implement it.
 	 * */
 	@Override
 	public void makeMove(){
-        StateNode initial = new StateNode(new State(new DummyPlayer(this, "us", this.getFaceUpCards()), new DummyPlayer(), generateTupleMap()), new ArrayList<StateNode>());
-
-    }
-
-
-    public HashMap<LengthColorTuple,Integer> generateTupleMap(){
-        HashMap<LengthColorTuple, Integer> tupleMap = new HashMap<LengthColorTuple, Integer>();
-        ArrayList<Route> avail = this.getAvailableRoutes();
-        for (Route route: avail){
-            LengthColorTuple tup = new LengthColorTuple(route.getCost(), route.getColor());
-            if (!tupleMap.containsKey(tup)) {
-                tupleMap.put(tup, 1);
+        if (initial==null) {
+            initial = new StateNode(new State(new DummyPlayer(this, "us", this.getFaceUpCards()), new DummyPlayer()));
+            initial.children = StateNode.generateChildNodes(initial);
+            for (int i = 0; i<initial.children.size(); i++){
+                StateNode c = initial.children.get(i);
+                c.children=StateNode.generateChildNodes(c);
+                initial.children.set(i,c);
             }
-            else {
-                tupleMap.put(tup, tupleMap.get(tup) + 1);
-            }
+
         }
-        return tupleMap;
     }
 
     public ArrayList<Route> getAvailableRoutes(){

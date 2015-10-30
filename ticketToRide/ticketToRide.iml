@@ -15,5 +15,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="JGame" level="project" />
     <orderEntry type="library" name="sharedPlayers" level="project" />
+    <orderEntry type="library" name="gson-2.4" level="project" />
   </component>
 </module>
