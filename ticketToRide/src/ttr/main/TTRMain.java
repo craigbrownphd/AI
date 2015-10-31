@@ -1,6 +1,8 @@
 package ttr.main;
 
 import ttr.model.player.*;
+import ttr.model.player.RandomPlayer;
+import ttr.model.player.SwankyPlayer;
 import ttr.view.scenes.TTRGamePlayScene;
 
 public class TTRMain {
@@ -12,8 +14,8 @@ public class TTRMain {
 		myGame.setFramesPerSecond(10);
 		
 		/* Initialize two players. This can be any combination of human players or AI players */
-		Player player1 = new DontHateThePlayer("Human Player");
-		Player player2 = new NamelessPlayer("Stupid Player");
+		Player player1 = new NamelessPlayer("Human Player");
+		Player player2 = new DontHateThePlayer("Stupid Player");
 		
 		/* Setup the scene, and get the game started */
 		TTRGamePlayScene scene = new TTRGamePlayScene("Ticket To Ride", "woodBacking.jpg", myGame, player1, player2);
